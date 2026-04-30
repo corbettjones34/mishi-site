@@ -350,10 +350,24 @@ function MissionCard({ mission: m, onLearnMore }) {
    hero + pills + why now + budget + getting there + CTA
    ═══════════════════════════════════════════════════════════ */
 function DestinationDetail({ mission: m, onClose }) {
+  const [whyNowText, setWhyNowText] = useState(null);
+  const [whyNowLoading, setWhyNowLoading] = useState(false);
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
+
+  // Lazy-fetch whyNow when overlay opens
+  useEffect(() => {
+    if (!m.learnMoreUrl) return;
+    setWhyNowLoading(true);
+    fetch(`${API_URL}?action=whynow&url=${encodeURIComponent(m.learnMoreUrl)}`)
+      .then(res => res.json())
+      .then(data => { if (data.whyNow) setWhyNowText(data.whyNow); })
+      .catch(() => {})
+      .finally(() => setWhyNowLoading(false));
+  }, [m.learnMoreUrl]);
 
   const conf = normalizeConf(m.confidence);
   const conditions = (m.conditions || "").split("\n").filter(c => c.trim());
@@ -372,9 +386,9 @@ function DestinationDetail({ mission: m, onClose }) {
   if (m.flightPrice > 0) pills.push(`~$${Math.round(m.flightPrice)} return from ${m.homeAirport || "home"}`);
   pills.push(`${m.days} days`);
 
-  // Use the rich "why now" text from the Learn More page if available, otherwise build from conditions
-  const whyNow = m.whyNow
-    ? m.whyNow
+  // Use lazy-fetched whyNow, fall back to conditions
+  const whyNow = whyNowText
+    ? whyNowText
     : conditions.length > 0
       ? `${m.destination} is showing ${conditions.join(" · ").toLowerCase()} across the ${formatDates(m.dateDepart, m.dateReturn)} window.`
       : `Conditions are lining up at ${m.destination} for the ${formatDates(m.dateDepart, m.dateReturn)} window.`;
@@ -424,7 +438,12 @@ function DestinationDetail({ mission: m, onClose }) {
               </div>
             )}
             <div style={styles.whyBox}>
-              <p style={styles.whyText}>{whyNow}</p>
+              <p style={styles.whyText}>
+                {whyNow}
+                {whyNowLoading && !whyNowText && (
+                  <span style={{ color: "#8a8a82", fontStyle: "italic" }}> Loading details...</span>
+                )}
+              </p>
             </div>
           </div>
 
