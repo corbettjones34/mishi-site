@@ -128,10 +128,10 @@ export default function MishiDashboard({ user, onSignOut }) {
   return (
     <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
       <style>{`
-        .nav-mobile { display: none; }
-        @media (max-width: 640px) {
+        .nav-mobile { display: none !important; }
+        @media (max-width: 768px) {
           .nav-desktop { display: none !important; }
-          .nav-mobile { display: flex; align-items: center; position: relative; }
+          .nav-mobile { display: flex !important; align-items: center; position: relative; }
           .detail-two-col { grid-template-columns: 1fr !important; }
           .hero-stats { gap: 20px !important; }
           .hero-name { font-size: 36px !important; }
