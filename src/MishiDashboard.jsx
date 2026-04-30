@@ -344,10 +344,12 @@ function DestinationDetail({ mission: m, onClose }) {
   if (m.flightPrice > 0) pills.push(`~$${Math.round(m.flightPrice)} return from ${m.homeAirport || "home"}`);
   pills.push(`${m.days} days`);
 
-  // Build "why now" paragraph from conditions data
-  const whyNow = conditions.length > 0
-    ? `${m.destination} is showing ${conditions.join(" · ").toLowerCase()} across the ${formatDates(m.dateDepart, m.dateReturn)} window. Condition rating: ${m.conditionRating}/100.`
-    : `Conditions are lining up at ${m.destination} for the ${formatDates(m.dateDepart, m.dateReturn)} window.`;
+  // Use the rich "why now" text from the Learn More page if available, otherwise build from conditions
+  const whyNow = m.whyNow
+    ? m.whyNow
+    : conditions.length > 0
+      ? `${m.destination} is showing ${conditions.join(" · ").toLowerCase()} across the ${formatDates(m.dateDepart, m.dateReturn)} window.`
+      : `Conditions are lining up at ${m.destination} for the ${formatDates(m.dateDepart, m.dateReturn)} window.`;
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -385,6 +387,14 @@ function DestinationDetail({ mission: m, onClose }) {
           {/* ─── Why we're recommending this now ─── */}
           <div style={styles.detailSection}>
             <h3 style={styles.detailSectionTitle}>Why we're recommending this now</h3>
+            {m.conditionRating > 0 && (
+              <div style={styles.condRatingRow}>
+                <div style={styles.condRatingBar}>
+                  <div style={{ ...styles.condRatingFill, width: `${m.conditionRating}%` }} />
+                </div>
+                <span style={styles.condRatingText}>Condition rating: {m.conditionRating}/100</span>
+              </div>
+            )}
             <div style={styles.whyBox}>
               <p style={styles.whyText}>{whyNow}</p>
             </div>
@@ -787,6 +797,21 @@ const styles = {
     fontFamily: "'Playfair Display', serif",
     fontSize: 20, fontWeight: 600, color: "#f5f4f0",
     marginBottom: 16, letterSpacing: -0.3,
+  },
+  condRatingRow: {
+    display: "flex", alignItems: "center", gap: 12,
+    marginBottom: 14,
+  },
+  condRatingBar: {
+    width: 100, height: 6, borderRadius: 6,
+    background: "rgba(255,255,255,0.08)", overflow: "hidden",
+  },
+  condRatingFill: {
+    height: "100%", borderRadius: 6,
+    background: "linear-gradient(90deg, #7a9868, #9EB384)",
+  },
+  condRatingText: {
+    fontSize: 13, fontWeight: 500, color: "#9EB384",
   },
   whyBox: {
     borderLeft: "3px solid #9EB384",
