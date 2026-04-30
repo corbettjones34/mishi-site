@@ -483,16 +483,14 @@ function DestinationDetail({ mission: m, onClose }) {
               ) : (
                 <button style={styles.detailCtaBtn}>Plan my personalised trip</button>
               )}
-              <button style={styles.shareBtn} onClick={() => {
-                if (navigator.share) {
-                  navigator.share({ title: m.destination + " — Mishi", url: window.location.href });
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert("Link copied!");
-                }
-              }}>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent("Check this out — I found this trip on Mishi: " + m.destination + " " + (m.learnMoreUrl || window.location.href))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={styles.shareBtn}
+              >
                 Share this with a friend
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -774,7 +772,7 @@ const styles = {
   // Pills
   pillsRow: {
     display: "flex", flexWrap: "wrap", gap: 8,
-    padding: "24px 0", justifyContent: "center",
+    padding: "24px 0", justifyContent: "flex-start",
     borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
   pill: {
