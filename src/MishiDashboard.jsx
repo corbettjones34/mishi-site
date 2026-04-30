@@ -127,6 +127,20 @@ export default function MishiDashboard({ user, onSignOut }) {
 
   return (
     <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
+      <style>{`
+        .nav-mobile { display: none; }
+        @media (max-width: 640px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile { display: flex; align-items: center; position: relative; }
+          .detail-two-col { grid-template-columns: 1fr !important; }
+          .hero-stats { gap: 20px !important; }
+          .hero-name { font-size: 36px !important; }
+          .hero-content-wrap { padding: 0 20px 40px !important; }
+          .section-inner-wrap { padding: 0 20px !important; }
+          .detail-body-wrap { padding: 0 20px 32px !important; }
+          nav { padding: 0 16px !important; }
+        }
+      `}</style>
       <Nav user={user} onSignOut={onSignOut} />
 
       {/* ─── Hero: Top Mission ─── */}
@@ -134,15 +148,15 @@ export default function MishiDashboard({ user, onSignOut }) {
         <section style={styles.heroSection}>
           <div style={{ ...styles.heroBg, backgroundImage: `url(${topMission.image})` }} />
           <div style={styles.heroOverlay} />
-          <div style={styles.heroContent}>
+          <div className="hero-content-wrap" style={styles.heroContent}>
             <p style={styles.greeting}>Welcome back, {firstName}</p>
             <div style={styles.topLabel}>
               <span style={styles.pulseDot} />
               <span>Your top mission</span>
             </div>
-            <h1 style={styles.destName}>{topMission.destination}</h1>
+            <h1 className="hero-name" style={styles.destName}>{topMission.destination}</h1>
 
-            <div style={styles.statsRow}>
+            <div className="hero-stats" style={styles.statsRow}>
               <div style={styles.stat}>
                 <span style={styles.statValue}>{formatDates(topMission.dateDepart, topMission.dateReturn)}</span>
                 <span style={styles.statLabel}>Travel window</span>
@@ -187,7 +201,7 @@ export default function MishiDashboard({ user, onSignOut }) {
       {/* ─── Other missions ─── */}
       {otherMissions.length > 0 && (
         <section style={styles.missionsSection}>
-          <div style={styles.sectionInner}>
+          <div className="section-inner-wrap" style={styles.sectionInner}>
             <div style={styles.sectionHeader}>
               <div>
                 <span style={styles.eyebrow}>Your missions</span>
@@ -245,19 +259,33 @@ export default function MishiDashboard({ user, onSignOut }) {
 
 
 /* ═══════════════════════════════════════════════════════════
-   Nav (logged-in)
+   Nav (logged-in) — hamburger on mobile
    ═══════════════════════════════════════════════════════════ */
 function Nav({ user, onSignOut }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const initials = (user.user_metadata?.full_name || user.email || "?")
     .split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <nav style={styles.nav}>
       <span style={styles.navLogo}>mishi</span>
-      <div style={styles.navRight}>
+
+      {/* Desktop nav links */}
+      <div className="nav-desktop" style={styles.navRight}>
         <span style={{ ...styles.navLink, color: "#9EB384" }}>My Missions</span>
         <button onClick={onSignOut} style={styles.navLink}>Sign out</button>
         <div style={styles.avatar}>{initials}</div>
+      </div>
+
+      {/* Mobile hamburger */}
+      <div className="nav-mobile">
+        <div style={styles.avatar} onClick={() => setMenuOpen(!menuOpen)}>{initials}</div>
+        {menuOpen && (
+          <div style={styles.mobileMenu}>
+            <span style={{ ...styles.mobileMenuItem, color: "#9EB384" }}>My Missions</span>
+            <button onClick={onSignOut} style={styles.mobileMenuItem}>Sign out</button>
+          </div>
+        )}
       </div>
     </nav>
   );
@@ -376,7 +404,7 @@ function DestinationDetail({ mission: m, onClose }) {
           </div>
         </div>
 
-        <div style={styles.detailBody}>
+        <div className="detail-body-wrap" style={styles.detailBody}>
           {/* ─── Pills row ─── */}
           <div style={styles.pillsRow}>
             {pills.map((p, i) => (
@@ -401,7 +429,7 @@ function DestinationDetail({ mission: m, onClose }) {
           </div>
 
           {/* ─── Two-column: Budget + Getting there ─── */}
-          <div style={styles.twoCol}>
+          <div className="detail-two-col" style={styles.twoCol}>
             {/* Rough budget */}
             <div style={styles.infoCard}>
               <h4 style={styles.infoCardTitle}>Rough budget</h4>
@@ -710,6 +738,21 @@ const styles = {
   },
   footerTag: { fontSize: 11, color: "#8a8a82", marginTop: 2, display: "block", letterSpacing: 0.5 },
   footerCopy: { fontSize: 12, color: "rgba(255,255,255,0.25)" },
+
+  // Mobile nav
+  mobileMenu: {
+    position: "absolute", top: 64, right: 16,
+    background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: 12, padding: "8px 0", minWidth: 160,
+    boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+    zIndex: 101,
+  },
+  mobileMenuItem: {
+    display: "block", width: "100%", padding: "12px 20px",
+    fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: 400,
+    background: "none", border: "none", textAlign: "left",
+    cursor: "pointer", fontFamily: "'Inter', sans-serif",
+  },
 
   // Spinner
   spinner: {
