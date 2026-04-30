@@ -88,10 +88,26 @@ export default function MishiDashboard({ user, onSignOut }) {
     ? otherMissions
     : otherMissions.filter(m => primaryTag(m.tag) === filter);
 
+  const responsiveCSS = `
+    .nav-mobile { display: none !important; }
+    @media (max-width: 768px) {
+      .nav-desktop { display: none !important; }
+      .nav-mobile { display: flex !important; align-items: center; position: relative; }
+      .detail-two-col { grid-template-columns: 1fr !important; }
+      .hero-stats { gap: 20px !important; }
+      .hero-name { font-size: 36px !important; }
+      .hero-content-wrap { padding: 0 20px 40px !important; }
+      .section-inner-wrap { padding: 0 20px !important; }
+      .detail-body-wrap { padding: 0 20px 32px !important; }
+      nav { padding: 0 16px !important; }
+    }
+  `;
+
   // ─── Loading state ───
   if (loading) {
     return (
       <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
+        <style>{responsiveCSS}</style>
         <Nav user={user} onSignOut={onSignOut} />
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -108,6 +124,7 @@ export default function MishiDashboard({ user, onSignOut }) {
   if (missions.length === 0) {
     return (
       <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
+        <style>{responsiveCSS}</style>
         <Nav user={user} onSignOut={onSignOut} />
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -127,20 +144,7 @@ export default function MishiDashboard({ user, onSignOut }) {
 
   return (
     <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
-      <style>{`
-        .nav-mobile { display: none !important; }
-        @media (max-width: 768px) {
-          .nav-desktop { display: none !important; }
-          .nav-mobile { display: flex !important; align-items: center; position: relative; }
-          .detail-two-col { grid-template-columns: 1fr !important; }
-          .hero-stats { gap: 20px !important; }
-          .hero-name { font-size: 36px !important; }
-          .hero-content-wrap { padding: 0 20px 40px !important; }
-          .section-inner-wrap { padding: 0 20px !important; }
-          .detail-body-wrap { padding: 0 20px 32px !important; }
-          nav { padding: 0 16px !important; }
-        }
-      `}</style>
+      <style>{responsiveCSS}</style>
       <Nav user={user} onSignOut={onSignOut} />
 
       {/* ─── Hero: Top Mission ─── */}
