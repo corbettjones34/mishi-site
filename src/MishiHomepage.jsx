@@ -93,7 +93,7 @@ function tagLabel(tag) {
 // COMPONENTS
 // ═══════════════════════════════════════════════════════════
 
-function Nav() {
+function Nav({ onSignIn }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -113,13 +113,13 @@ function Nav() {
       <div style={s.navRight}>
         <span style={s.navLink}>How it works</span>
         <span style={s.navLink}>Destinations</span>
-        <button style={s.navCta}>Get started</button>
+        <button style={s.navCta} onClick={onSignIn}>Get started</button>
       </div>
     </nav>
   );
 }
 
-function Hero() {
+function Hero({ onSignIn }) {
   const [current, setCurrent] = useState(0);
   const [opacity, setOpacity] = useState(1);
 
@@ -168,8 +168,8 @@ function Hero() {
         </p>
 
         <div style={s.heroCtas}>
-          <button style={s.btnPrimary}>Find my next mission</button>
-          <span style={s.btnGhost}>Already a member? Sign in</span>
+          <button style={s.btnPrimary} onClick={onSignIn}>Find my next mission</button>
+          <span style={s.btnGhost} onClick={onSignIn}>Already a member? Sign in</span>
         </div>
       </div>
 
@@ -358,7 +358,7 @@ function Stats() {
   );
 }
 
-function FinalCta() {
+function FinalCta({ onSignIn }) {
   return (
     <section style={s.finalCtaSection}>
       <div style={s.finalCtaInner}>
@@ -366,7 +366,7 @@ function FinalCta() {
         <p style={s.finalCtaSub}>
           Join Mishi and get personalised missions based on real-time conditions.
         </p>
-        <button style={s.btnPrimary}>Get started — it's free</button>
+        <button style={s.btnPrimary} onClick={onSignIn}>Get started — it's free</button>
       </div>
     </section>
   );
@@ -395,7 +395,7 @@ function Footer() {
 // MAIN
 // ═══════════════════════════════════════════════════════════
 
-export default function MishiHomepage() {
+export default function MishiHomepage({ onSignIn } = {}) {
   return (
     <div style={s.page}>
       <style>{`
@@ -415,13 +415,13 @@ export default function MishiHomepage() {
         button { font-family: 'Inter', sans-serif; }
       `}</style>
 
-      <Nav />
-      <Hero />
+      <Nav onSignIn={onSignIn} />
+      <Hero onSignIn={onSignIn} />
       <LiveMissions />
       <HowItWorks />
       <Manifesto />
       <Stats />
-      <FinalCta />
+      <FinalCta onSignIn={onSignIn} />
       <Footer />
     </div>
   );
