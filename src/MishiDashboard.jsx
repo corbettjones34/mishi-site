@@ -6,7 +6,7 @@ import { supabase } from "./supabaseClient";
    Shows the user's personalised missions from the API
    ═══════════════════════════════════════════════════════════ */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwn1JGOG2NE_HB1CLmOtKsmzAVRiAKGVHhPDtJ5PioGd9CZky3kxTNvvD9j0TDyujCh/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxG__16DI6ztPEYId9Dp63i6kW1LOIP6nFEXBpJbJqf9vWXeOsrKQZVmtKFpI17eRQ/exec";
 
 // Confidence comes as raw adjusted score (0-200+), normalize to 0-99
 function normalizeConf(raw) {
