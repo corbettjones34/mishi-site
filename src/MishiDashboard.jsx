@@ -318,10 +318,10 @@ function MissionCard({ mission: m, onLearnMore }) {
 
 /* ═══════════════════════════════════════════════════════════
    Destination Detail Overlay
-   Full-screen view with destination info + Plan My Trip
+   Matches the existing Apps Script destination page:
+   hero + pills + why now + budget + getting there + CTA
    ═══════════════════════════════════════════════════════════ */
 function DestinationDetail({ mission: m, onClose }) {
-  // Prevent body scroll when overlay is open
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
@@ -329,6 +329,25 @@ function DestinationDetail({ mission: m, onClose }) {
 
   const conf = normalizeConf(m.confidence);
   const conditions = (m.conditions || "").split("\n").filter(c => c.trim());
+  const tag = primaryTag(m.tag);
+
+  // Condition quality label
+  const condLabel = m.conditionRating >= 85 ? "Peak conditions"
+    : m.conditionRating >= 70 ? "Great conditions"
+    : m.conditionRating >= 55 ? "Good conditions"
+    : "Conditions tracked";
+
+  // Build pills
+  const pills = [condLabel];
+  if (tag) pills.push(capitalise(tag));
+  if (m.hotelPrice > 0) pills.push(`~$${Math.round(m.hotelPrice)}/night pp`);
+  if (m.flightPrice > 0) pills.push(`~$${Math.round(m.flightPrice)} return from ${m.homeAirport || "home"}`);
+  pills.push(`${m.days} days`);
+
+  // Build "why now" paragraph from conditions data
+  const whyNow = conditions.length > 0
+    ? `${m.destination} is showing ${conditions.join(" · ").toLowerCase()} across the ${formatDates(m.dateDepart, m.dateReturn)} window. Condition rating: ${m.conditionRating}/100.`
+    : `Conditions are lining up at ${m.destination} for the ${formatDates(m.dateDepart, m.dateReturn)} window.`;
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -340,7 +359,7 @@ function DestinationDetail({ mission: m, onClose }) {
           </svg>
         </button>
 
-        {/* Hero image */}
+        {/* Hero image with name + description */}
         <div style={styles.detailHero}>
           <img
             src={m.image}
@@ -350,102 +369,121 @@ function DestinationDetail({ mission: m, onClose }) {
           />
           <div style={styles.detailHeroOverlay} />
           <div style={styles.detailHeroText}>
-            {m.tag && (
-              <span style={styles.detailTag}>{primaryTag(m.tag)}</span>
-            )}
             <h1 style={styles.detailName}>{m.destination}</h1>
+            <p style={styles.detailHeroDesc}>{m.description}</p>
           </div>
         </div>
 
-        {/* Content */}
         <div style={styles.detailBody}>
-          {/* Stats bar */}
-          <div style={styles.detailStats}>
-            <div style={styles.detailStatItem}>
-              <span style={styles.detailStatValue}>{formatDates(m.dateDepart, m.dateReturn)}</span>
-              <span style={styles.detailStatLabel}>Travel window</span>
+          {/* ─── Pills row ─── */}
+          <div style={styles.pillsRow}>
+            {pills.map((p, i) => (
+              <span key={i} style={i === 0 ? styles.pillHighlight : styles.pill}>{p}</span>
+            ))}
+          </div>
+
+          {/* ─── Why we're recommending this now ─── */}
+          <div style={styles.detailSection}>
+            <h3 style={styles.detailSectionTitle}>Why we're recommending this now</h3>
+            <div style={styles.whyBox}>
+              <p style={styles.whyText}>{whyNow}</p>
             </div>
-            <div style={styles.detailStatDivider} />
-            <div style={styles.detailStatItem}>
-              <span style={styles.detailStatValue}>{m.days} days</span>
-              <span style={styles.detailStatLabel}>Duration</span>
-            </div>
-            <div style={styles.detailStatDivider} />
-            <div style={styles.detailStatItem}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ ...styles.confBarOuter, width: 80 }}>
-                  <div style={{ ...styles.confBarInner, width: `${Math.min(100, conf)}%` }} />
+          </div>
+
+          {/* ─── Two-column: Budget + Getting there ─── */}
+          <div style={styles.twoCol}>
+            {/* Rough budget */}
+            <div style={styles.infoCard}>
+              <h4 style={styles.infoCardTitle}>Rough budget</h4>
+              <div style={styles.infoCardBody}>
+                {m.hotelPrice > 0 && (
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoLabel}>Accommodation</span>
+                    <span style={styles.infoValue}>~${Math.round(m.hotelPrice)}/night pp</span>
+                  </div>
+                )}
+                {m.flightPrice > 0 && (
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoLabel}>Flights from {m.homeAirport || "home"}</span>
+                    <span style={styles.infoValue}>~${Math.round(m.flightPrice)} return</span>
+                  </div>
+                )}
+                {m.flightPrice === 0 && (
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoLabel}>Flights</span>
+                    <span style={styles.infoValue}>Local / no flight needed</span>
+                  </div>
+                )}
+                <div style={styles.infoRow}>
+                  <span style={styles.infoLabel}>Food</span>
+                  <span style={styles.infoValue}>$10–30/day</span>
                 </div>
-                <span style={styles.confText}>{conf}%</span>
+                {m.costPerDay > 0 && (
+                  <div style={{ ...styles.infoRow, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10, marginTop: 4 }}>
+                    <span style={{ ...styles.infoLabel, fontWeight: 600, color: "#f5f4f0" }}>~${Math.round(m.costPerDay)}/day</span>
+                    <span style={styles.infoValue}>+ flights</span>
+                  </div>
+                )}
               </div>
-              <span style={styles.detailStatLabel}>Confidence</span>
+            </div>
+
+            {/* Getting there */}
+            <div style={styles.infoCard}>
+              <h4 style={styles.infoCardTitle}>Getting there</h4>
+              <div style={styles.infoCardBody}>
+                {m.airportCode && (
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoLabel}>Airport</span>
+                    <span style={styles.infoValue}>{m.airportCode}</span>
+                  </div>
+                )}
+                {m.flightPrice > 0 && (
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoLabel}>From {m.homeAirport || "home"}</span>
+                    <span style={styles.infoValue}>~${Math.round(m.flightPrice)} return</span>
+                  </div>
+                )}
+                {m.flightHours > 0 && (
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoLabel}>Flight time</span>
+                    <span style={styles.infoValue}>~{m.flightHours}h</span>
+                  </div>
+                )}
+                <div style={styles.infoRow}>
+                  <span style={styles.infoLabel}>Suggested dates</span>
+                  <span style={styles.infoValue}>{formatDates(m.dateDepart, m.dateReturn)}</span>
+                </div>
+                <div style={styles.infoRow}>
+                  <span style={styles.infoLabel}>Trip length</span>
+                  <span style={styles.infoValue}>{m.days} days</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Why now */}
-          <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>Why now</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {conditions.length > 0 ? conditions.map((c, i) => (
-                <div key={i} style={styles.conditionRow}>
-                  <span style={styles.sigDot} />
-                  <span style={{ fontSize: 14, color: "#f5f4f0" }}>{c.trim()}</span>
-                </div>
-              )) : (
-                <p style={{ fontSize: 14, color: "#8a8a82" }}>Conditions are lining up for this destination.</p>
+          {/* ─── Ready to go? ─── */}
+          <div style={styles.readySection}>
+            <h3 style={styles.readyTitle}>Ready to go?</h3>
+            <p style={styles.readySub}>We'll build a personalised itinerary matched to your travel style, budget, and airport.</p>
+            <div style={styles.readyActions}>
+              {m.planMyTripUrl ? (
+                <a href={m.planMyTripUrl} target="_blank" rel="noopener" style={styles.detailCtaBtn}>
+                  Plan my personalised trip
+                </a>
+              ) : (
+                <button style={styles.detailCtaBtn}>Plan my personalised trip</button>
               )}
+              <button style={styles.shareBtn} onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: m.destination + " — Mishi", url: window.location.href });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert("Link copied!");
+                }
+              }}>
+                Share this with a friend
+              </button>
             </div>
-          </div>
-
-          {/* About */}
-          <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>About this destination</h3>
-            <p style={styles.detailDescription}>{m.description}</p>
-          </div>
-
-          {/* Pricing */}
-          <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>Trip estimate</h3>
-            <div style={styles.priceGrid}>
-              {m.flightPrice > 0 && (
-                <div style={styles.priceItem}>
-                  <span style={styles.priceItemValue}>{formatPrice(m.flightPrice)}</span>
-                  <span style={styles.priceItemLabel}>Flight pp return</span>
-                </div>
-              )}
-              {m.hotelPrice > 0 && (
-                <div style={styles.priceItem}>
-                  <span style={styles.priceItemValue}>{formatPrice(m.hotelPrice)}</span>
-                  <span style={styles.priceItemLabel}>Hotel per night</span>
-                </div>
-              )}
-              {m.tripCost > 0 && (
-                <div style={styles.priceItem}>
-                  <span style={styles.priceItemValue}>{formatPrice(m.tripCost)}</span>
-                  <span style={styles.priceItemLabel}>Total trip estimate</span>
-                </div>
-              )}
-              {m.costPerDay > 0 && (
-                <div style={styles.priceItem}>
-                  <span style={styles.priceItemValue}>{formatPrice(m.costPerDay)}</span>
-                  <span style={styles.priceItemLabel}>Per day</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div style={styles.detailCta}>
-            {m.planMyTripUrl ? (
-              <a href={m.planMyTripUrl} target="_blank" rel="noopener" style={styles.detailCtaBtn}>
-                Plan My Trip
-              </a>
-            ) : (
-              <button style={styles.detailCtaBtn}>Plan My Trip</button>
-            )}
-            <p style={styles.detailCtaSub}>
-              We'll send you a personalised itinerary with accommodation, activities and everything you need.
-            </p>
           </div>
         </div>
       </div>
@@ -684,7 +722,7 @@ const styles = {
   },
   overlayContent: {
     position: "relative",
-    width: "100%", maxWidth: 720,
+    width: "100%", maxWidth: 760,
     background: "#141414",
     borderRadius: 20,
     overflow: "hidden",
@@ -699,98 +737,126 @@ const styles = {
     display: "flex", alignItems: "center", justifyContent: "center",
   },
   detailHero: {
-    position: "relative", height: 320, overflow: "hidden",
+    position: "relative", height: 340, overflow: "hidden",
   },
   detailHeroImg: {
     width: "100%", height: "100%", objectFit: "cover",
   },
   detailHeroOverlay: {
     position: "absolute", inset: 0,
-    background: "linear-gradient(to top, rgba(20,20,20,1) 0%, rgba(20,20,20,0.4) 40%, transparent 100%)",
+    background: "linear-gradient(to top, rgba(20,20,20,1) 0%, rgba(20,20,20,0.6) 50%, rgba(0,0,0,0.15) 100%)",
   },
   detailHeroText: {
-    position: "absolute", bottom: 28, left: 32, zIndex: 2,
-  },
-  detailTag: {
-    display: "inline-block",
-    background: "rgba(255,255,255,0.12)", backdropFilter: "blur(12px)",
-    color: "#fff", fontSize: 10, fontWeight: 600,
-    padding: "4px 14px", borderRadius: 999,
-    letterSpacing: 1, textTransform: "uppercase",
-    marginBottom: 10,
+    position: "absolute", bottom: 28, left: 32, right: 32, zIndex: 2,
   },
   detailName: {
     fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700,
-    color: "#fff", margin: 0, lineHeight: 1.1, letterSpacing: -0.5,
+    color: "#fff", margin: "0 0 10px", lineHeight: 1.1, letterSpacing: -0.5,
+  },
+  detailHeroDesc: {
+    fontSize: 14, lineHeight: 1.6, color: "rgba(255,255,255,0.75)",
+    fontWeight: 300, maxWidth: 500, margin: 0,
   },
   detailBody: {
     padding: "0 32px 40px",
   },
-  detailStats: {
-    display: "flex", alignItems: "center", gap: 0,
-    padding: "24px 0", marginBottom: 8,
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
-    flexWrap: "wrap",
+
+  // Pills
+  pillsRow: {
+    display: "flex", flexWrap: "wrap", gap: 8,
+    padding: "24px 0", justifyContent: "center",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
-  detailStatItem: {
-    flex: 1, minWidth: 120,
-    display: "flex", flexDirection: "column", alignItems: "center",
-    padding: "0 12px",
+  pill: {
+    padding: "6px 16px", borderRadius: 999,
+    background: "transparent", border: "1px solid rgba(255,255,255,0.12)",
+    color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 400,
   },
-  detailStatValue: {
-    fontSize: 17, fontWeight: 600, color: "#f5f4f0", letterSpacing: -0.3,
+  pillHighlight: {
+    padding: "6px 16px", borderRadius: 999,
+    background: "rgba(158,179,132,0.12)", border: "1px solid rgba(158,179,132,0.25)",
+    color: "#9EB384", fontSize: 12, fontWeight: 500,
   },
-  detailStatLabel: {
-    fontSize: 10, color: "#8a8a82", textTransform: "uppercase",
-    letterSpacing: 1.5, fontWeight: 500, marginTop: 4,
-  },
-  detailStatDivider: {
-    width: 1, height: 32, background: "rgba(255,255,255,0.08)",
-  },
+
+  // Why now
   detailSection: {
-    padding: "24px 0",
+    padding: "28px 0",
     borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
   detailSectionTitle: {
-    fontSize: 13, fontWeight: 600, color: "#9EB384",
-    textTransform: "uppercase", letterSpacing: 1.5,
-    marginBottom: 14,
+    fontFamily: "'Playfair Display', serif",
+    fontSize: 20, fontWeight: 600, color: "#f5f4f0",
+    marginBottom: 16, letterSpacing: -0.3,
   },
-  conditionRow: {
-    display: "flex", alignItems: "center", gap: 10,
+  whyBox: {
+    borderLeft: "3px solid #9EB384",
+    padding: "16px 20px",
+    background: "rgba(158,179,132,0.06)",
+    borderRadius: "0 10px 10px 0",
   },
-  detailDescription: {
-    fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.75)",
-    fontWeight: 300,
+  whyText: {
+    fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.75)",
+    fontWeight: 300, margin: 0,
   },
-  priceGrid: {
+
+  // Two-column cards
+  twoCol: {
     display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16,
+    padding: "28px 0",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
-  priceItem: {
+  infoCard: {
     background: "rgba(255,255,255,0.03)",
     border: "1px solid rgba(255,255,255,0.06)",
-    borderRadius: 12, padding: "16px 20px",
-    display: "flex", flexDirection: "column",
+    borderRadius: 14, padding: "20px",
   },
-  priceItemValue: {
-    fontSize: 22, fontWeight: 700, color: "#f5f4f0", letterSpacing: -0.5,
+  infoCardTitle: {
+    fontSize: 15, fontWeight: 600, color: "#f5f4f0",
+    margin: "0 0 16px", letterSpacing: -0.2,
   },
-  priceItemLabel: {
-    fontSize: 11, color: "#8a8a82", marginTop: 4, fontWeight: 400,
+  infoCardBody: {
+    display: "flex", flexDirection: "column", gap: 10,
   },
-  detailCta: {
-    padding: "32px 0 0", textAlign: "center",
+  infoRow: {
+    display: "flex", justifyContent: "space-between", alignItems: "baseline",
+  },
+  infoLabel: {
+    fontSize: 13, color: "#8a8a82", fontWeight: 400,
+  },
+  infoValue: {
+    fontSize: 13, color: "#f5f4f0", fontWeight: 500,
+  },
+
+  // Ready to go CTA
+  readySection: {
+    padding: "36px 0 0", textAlign: "center",
+  },
+  readyTitle: {
+    fontFamily: "'Playfair Display', serif",
+    fontSize: 24, fontWeight: 700, color: "#f5f4f0",
+    margin: "0 0 8px", letterSpacing: -0.3,
+  },
+  readySub: {
+    fontSize: 14, color: "#8a8a82", fontWeight: 300,
+    margin: "0 0 24px", lineHeight: 1.5,
+  },
+  readyActions: {
+    display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap",
   },
   detailCtaBtn: {
     display: "inline-flex", alignItems: "center", justifyContent: "center",
-    width: "100%", padding: "16px 32px",
+    padding: "14px 32px",
     background: "#9EB384", color: "#fff",
-    border: "none", borderRadius: 12,
-    fontSize: 16, fontWeight: 600, letterSpacing: 0.2,
+    border: "none", borderRadius: 10,
+    fontSize: 14, fontWeight: 600, letterSpacing: 0.2,
     cursor: "pointer", textDecoration: "none",
   },
-  detailCtaSub: {
-    fontSize: 13, color: "#8a8a82", marginTop: 12,
-    lineHeight: 1.5, fontWeight: 300,
+  shareBtn: {
+    display: "inline-flex", alignItems: "center", justifyContent: "center",
+    padding: "14px 28px",
+    background: "transparent", color: "rgba(255,255,255,0.7)",
+    border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10,
+    fontSize: 14, fontWeight: 500, letterSpacing: 0.2,
+    cursor: "pointer", fontFamily: "'Inter', sans-serif",
   },
 };
