@@ -167,9 +167,9 @@ export default function MishiDashboard({ user, onSignOut }) {
               </div>
               <div style={styles.stat}>
                 <span style={styles.statValue}>
-                  {topMission.flightPrice > 0 ? `from ${formatPrice(topMission.flightPrice)}` : "Local"}
+                  {topMission.flightPrice > 0 ? `from ${formatPrice(topMission.flightPrice)}` : "Staycation"}
                 </span>
-                <span style={styles.statLabel}>Flight pp return</span>
+                <span style={styles.statLabel}>{topMission.flightPrice > 0 ? "Flight pp return" : ""}</span>
               </div>
               <div style={styles.stat}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -334,8 +334,14 @@ function MissionCard({ mission: m, onLearnMore }) {
         <p style={styles.cardWhy}>{m.description?.slice(0, 100)}{m.description?.length > 100 ? "..." : ""}</p>
         <div style={styles.cardMetaRow}>
           <div>
-            <span style={styles.cardPrice}>from {formatPrice(m.flightPrice)}</span>
-            <span style={styles.cardPriceSub}> pp return</span>
+            {m.flightPrice > 0 ? (
+              <>
+                <span style={styles.cardPrice}>from {formatPrice(m.flightPrice)}</span>
+                <span style={styles.cardPriceSub}> pp return</span>
+              </>
+            ) : (
+              <span style={{ ...styles.cardPrice, color: "#9EB384" }}>Staycation</span>
+            )}
           </div>
           <span style={styles.cardDates}>{formatDates(m.dateDepart, m.dateReturn)}</span>
         </div>
