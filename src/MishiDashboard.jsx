@@ -489,10 +489,10 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
                   <span style={styles.infoLabel}>Food</span>
                   <span style={styles.infoValue}>$10–30/day</span>
                 </div>
-                {m.costPerDay > 0 && (
+                {m.tripCost > 0 && (
                   <div style={{ ...styles.infoRow, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10, marginTop: 4 }}>
-                    <span style={{ ...styles.infoLabel, fontWeight: 600, color: "#f5f4f0" }}>~${Math.round(m.costPerDay)}/day</span>
-                    <span style={styles.infoValue}>+ flights</span>
+                    <span style={{ ...styles.infoLabel, fontWeight: 600, color: "#f5f4f0" }}>~${Math.round(m.tripCost).toLocaleString()} total pp</span>
+                    <span style={styles.infoValue}>{m.days} days</span>
                   </div>
                 )}
               </div>
