@@ -377,7 +377,7 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
     setWhyNowLoading(true);
     fetch(`${API_URL}?action=whynow&url=${encodeURIComponent(m.learnMoreUrl)}`)
       .then(res => res.json())
-      .then(data => { if (data.whyNow) setWhyNowText(data.whyNow); })
+      .then(data => { if (data.whyNow && !data.whyNow.startsWith("NO_MATCH") && !data.whyNow.startsWith("FETCH_ERROR")) setWhyNowText(data.whyNow); })
       .catch(() => {})
       .finally(() => setWhyNowLoading(false));
   }, [m.learnMoreUrl]);
