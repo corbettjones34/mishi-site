@@ -440,9 +440,6 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
             <div style={styles.whyBox}>
               <p style={styles.whyText}>
                 {whyNow}
-                {whyNowLoading && !whyNowText && (
-                  <span style={{ color: "#8a8a82", fontStyle: "italic" }}> Loading details...</span>
-                )}
               </p>
             </div>
           </div>
