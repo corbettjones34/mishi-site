@@ -50,6 +50,7 @@ export default function MishiDashboard({ user, onSignOut }) {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
   const [selectedMission, setSelectedMission] = useState(null);
+  const [budgetTier, setBudgetTier] = useState("mid-range");
 
   const firstName = user.user_metadata?.full_name?.split(" ")[0] ||
                     user.email?.split("@")[0] || "traveller";
@@ -68,6 +69,7 @@ export default function MishiDashboard({ user, onSignOut }) {
         setMissions([]);
       } else {
         setMissions(data.missions || []);
+        setBudgetTier(data.budgetTier || "mid-range");
         setError(null);
       }
     } catch (err) {
@@ -254,6 +256,7 @@ export default function MishiDashboard({ user, onSignOut }) {
       {selectedMission && (
         <DestinationDetail
           mission={selectedMission}
+          budgetTier={budgetTier}
           onClose={() => setSelectedMission(null)}
         />
       )}
@@ -359,7 +362,7 @@ function MissionCard({ mission: m, onLearnMore }) {
    Matches the existing Apps Script destination page:
    hero + pills + why now + budget + getting there + CTA
    ═══════════════════════════════════════════════════════════ */
-function DestinationDetail({ mission: m, onClose }) {
+function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
   const [whyNowText, setWhyNowText] = useState(null);
   const [whyNowLoading, setWhyNowLoading] = useState(false);
 
@@ -392,6 +395,7 @@ function DestinationDetail({ mission: m, onClose }) {
   // Build pills
   const pills = [condLabel];
   if (tag) pills.push(capitalise(tag));
+  const tierLabel = budgetTier === "budget" ? "Budget" : budgetTier === "top-end" ? "Top-end" : "Mid-range";
   if (m.hotelPrice > 0) pills.push(`~$${Math.round(m.hotelPrice)}/night pp`);
   if (m.flightPrice > 0) pills.push(`~$${Math.round(m.flightPrice)} return from ${m.homeAirport || "home"}`);
   pills.push(`${m.days} days`);
@@ -465,7 +469,7 @@ function DestinationDetail({ mission: m, onClose }) {
               <div style={styles.infoCardBody}>
                 {m.hotelPrice > 0 && (
                   <div style={styles.infoRow}>
-                    <span style={styles.infoLabel}>Accommodation</span>
+                    <span style={styles.infoLabel}>Accommodation <span style={{fontWeight: 400, opacity: 0.6, fontSize: 11}}>({tierLabel})</span></span>
                     <span style={styles.infoValue}>~${Math.round(m.hotelPrice)}/night pp</span>
                   </div>
                 )}
