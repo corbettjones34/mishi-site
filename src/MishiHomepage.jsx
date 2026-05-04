@@ -396,6 +396,9 @@ function Footer() {
 // ═══════════════════════════════════════════════════════════
 
 export default function MishiHomepage({ onSignIn } = {}) {
+  const destParam = new URLSearchParams(window.location.search).get("destination");
+  const destName = destParam ? destParam.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : null;
+
   return (
     <div style={s.page}>
       <style>{`
@@ -416,6 +419,25 @@ export default function MishiHomepage({ onSignIn } = {}) {
       `}</style>
 
       <Nav onSignIn={onSignIn} />
+
+      {/* Banner when arriving via a shared destination link */}
+      {destName && (
+        <div style={{
+          background: "rgba(158,179,132,0.12)", borderBottom: "1px solid rgba(158,179,132,0.25)",
+          padding: "14px 24px", textAlign: "center", position: "fixed", top: 72, left: 0, right: 0, zIndex: 99,
+        }}>
+          <span style={{ color: "#9EB384", fontSize: 14, fontFamily: "'Inter', sans-serif" }}>
+            Someone shared <strong>{destName}</strong> with you —{" "}
+            <button onClick={onSignIn} style={{
+              background: "none", border: "none", color: "#fff", textDecoration: "underline",
+              cursor: "pointer", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600,
+            }}>
+              sign in to see the full trip
+            </button>
+          </span>
+        </div>
+      )}
+
       <Hero onSignIn={onSignIn} />
       <LiveMissions />
       <HowItWorks />

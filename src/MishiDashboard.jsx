@@ -25,6 +25,36 @@ function capitalise(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+// URL-safe slug from destination name: "Ubud, Bali" → "ubud-bali"
+function slugify(name) {
+  if (!name) return "";
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+// Read ?destination= from current URL
+function getDestinationSlugFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("destination") || "";
+}
+
+// Push or replace ?destination= in URL without reload
+function setDestinationInURL(slug) {
+  const url = new URL(window.location.href);
+  if (slug) {
+    url.searchParams.set("destination", slug);
+  } else {
+    url.searchParams.delete("destination");
+  }
+  window.history.pushState({}, "", url.toString());
+}
+
+// Build a shareable URL for a destination
+function getShareURL(destinationName) {
+  const url = new URL(window.location.origin);
+  url.searchParams.set("destination", slugify(destinationName));
+  return url.toString();
+}
+
 function formatPrice(n) {
   if (!n || n === 0) return "Local";
   return "$" + Math.round(n).toLocaleString();
@@ -55,9 +85,49 @@ export default function MishiDashboard({ user, onSignOut }) {
   const firstName = user.user_metadata?.full_name?.split(" ")[0] ||
                     user.email?.split("@")[0] || "traveller";
 
+  // Open a mission detail and update the URL
+  function openMission(mission) {
+    setSelectedMission(mission);
+    if (mission) {
+      setDestinationInURL(slugify(mission.destination));
+    }
+  }
+
+  // Close detail and clean URL
+  function closeMission() {
+    setSelectedMission(null);
+    setDestinationInURL(null);
+  }
+
   useEffect(() => {
     fetchMissions();
   }, [user.email]);
+
+  // After missions load, check URL for ?destination= and auto-open
+  useEffect(() => {
+    if (missions.length === 0) return;
+    const slug = getDestinationSlugFromURL();
+    if (!slug) return;
+    const match = missions.find(m => slugify(m.destination) === slug);
+    if (match) {
+      setSelectedMission(match);
+    }
+  }, [missions]);
+
+  // Handle browser back/forward
+  useEffect(() => {
+    function onPopState() {
+      const slug = getDestinationSlugFromURL();
+      if (slug) {
+        const match = missions.find(m => slugify(m.destination) === slug);
+        setSelectedMission(match || null);
+      } else {
+        setSelectedMission(null);
+      }
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [missions]);
 
   async function fetchMissions() {
     try {
@@ -196,7 +266,7 @@ export default function MishiDashboard({ user, onSignOut }) {
             )}
 
             <div style={styles.heroActions}>
-              <button onClick={() => setSelectedMission(topMission)} style={styles.btnPrimary}>
+              <button onClick={() => openMission(topMission)} style={styles.btnPrimary}>
                 Learn more
               </button>
             </div>
@@ -233,7 +303,7 @@ export default function MishiDashboard({ user, onSignOut }) {
                 <MissionCard
                   key={i}
                   mission={m}
-                  onLearnMore={() => setSelectedMission(m)}
+                  onLearnMore={() => openMission(m)}
                 />
               ))}
             </div>
@@ -257,7 +327,7 @@ export default function MishiDashboard({ user, onSignOut }) {
         <DestinationDetail
           mission={selectedMission}
           budgetTier={budgetTier}
-          onClose={() => setSelectedMission(null)}
+          onClose={closeMission}
         />
       )}
     </div>
@@ -528,7 +598,7 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
                 <button style={styles.detailCtaBtn}>Plan my personalised trip</button>
               )}
               <a
-                href={`https://wa.me/?text=${encodeURIComponent("Check this out — I found this trip on Mishi: " + m.destination + " " + (m.learnMoreUrl || window.location.href))}`}
+                href={`https://wa.me/?text=${encodeURIComponent("Check this out — I found this trip on Mishi: " + m.destination + " " + getShareURL(m.destination))}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={styles.shareBtn}

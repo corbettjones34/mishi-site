@@ -24,10 +24,16 @@ export default function App() {
   }, []);
 
   async function handleSignIn() {
+    // Preserve ?destination= param through OAuth so user lands on the right page after login
+    const redirectUrl = new URL(window.location.origin);
+    const destParam = new URLSearchParams(window.location.search).get("destination");
+    if (destParam) {
+      redirectUrl.searchParams.set("destination", destParam);
+    }
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: redirectUrl.toString(),
       },
     });
   }
