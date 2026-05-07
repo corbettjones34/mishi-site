@@ -239,8 +239,8 @@ function MissionCard({ mission, index }) {
 
         <div style={s.cardFooter}>
           <div>
-            <span style={s.cardPrice}>Flights from {mission.price}</span>
-            <span style={s.cardPriceSub}> per person return</span>
+            <span style={s.cardPrice}>from {mission.price}</span>
+            <span style={s.cardPriceSub}> pp return</span>
           </div>
           <span style={s.cardDates}>{mission.dates}</span>
         </div>
