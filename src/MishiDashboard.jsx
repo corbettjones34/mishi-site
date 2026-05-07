@@ -410,7 +410,7 @@ function MissionCard({ mission: m, onLearnMore }) {
             {m.flightPrice > 0 ? (
               <>
                 <span style={styles.cardPrice}>Flights from {formatPrice(m.flightPrice)}</span>
-                <span style={styles.cardPriceSub}> per person return</span>
+                <span style={styles.cardPriceSub}>  per person return</span>
               </>
             ) : (
               <span style={{ ...styles.cardPrice, color: "#9EB384" }}>Staycation</span>
@@ -985,3 +985,30 @@ const styles = {
   },
   readyTitle: {
     fontFamily: "'Playfair Display', serif",
+    fontSize: 24, fontWeight: 700, color: "#f5f4f0",
+    margin: "0 0 8px", letterSpacing: -0.3,
+  },
+  readySub: {
+    fontSize: 14, color: "#8a8a82", fontWeight: 300,
+    margin: "0 0 24px", lineHeight: 1.5,
+  },
+  readyActions: {
+    display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap",
+  },
+  detailCtaBtn: {
+    display: "inline-flex", alignItems: "center", justifyContent: "center",
+    padding: "14px 32px",
+    background: "#9EB384", color: "#fff",
+    border: "none", borderRadius: 10,
+    fontSize: 14, fontWeight: 600, letterSpacing: 0.2,
+    cursor: "pointer", textDecoration: "none",
+  },
+  shareBtn: {
+    display: "inline-flex", alignItems: "center", justifyContent: "center",
+    padding: "14px 28px",
+    background: "transparent", color: "rgba(255,255,255,0.7)",
+    border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10,
+    fontSize: 14, fontWeight: 500, letterSpacing: 0.2,
+    cursor: "pointer", fontFamily: "'Inter', sans-serif",
+  },
+};
