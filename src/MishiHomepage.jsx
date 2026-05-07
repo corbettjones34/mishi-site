@@ -239,8 +239,8 @@ function MissionCard({ mission, index }) {
 
         <div style={s.cardFooter}>
           <div>
-            <span style={s.cardPrice}>from {mission.price}</span>
-            <span style={s.cardPriceSub}> pp return</span>
+            <span style={s.cardPrice}>Flights from {mission.price}</span>
+            <span style={s.cardPriceSub}> per person return</span>
           </div>
           <span style={s.cardDates}>{mission.dates}</span>
         </div>
@@ -773,31 +773,4 @@ const s = {
   finalCtaSub: {
     fontSize: 16, lineHeight: 1.6, color: muted,
     fontWeight: 300, margin: "0 0 36px",
-  },
-
-  // ─── Footer ───
-  footer: {
-    padding: "48px 0",
-    borderTop: `1px solid ${faintBorder}`,
-    background: dark,
-  },
-  footerInner: {
-    maxWidth: 1200, margin: "0 auto", padding: "0 48px",
-    display: "flex", justifyContent: "space-between",
-    alignItems: "center", flexWrap: "wrap", gap: 24,
-  },
-  footerLogo: {
-    fontFamily: serif, fontSize: 22, fontWeight: 700, color: warmWhite,
-    display: "block",
-  },
-  footerTag: {
-    fontSize: 11, color: muted, marginTop: 2, display: "block",
-    letterSpacing: 0.5,
-  },
-  footerLinks: { display: "flex", gap: 28 },
-  footerLink: {
-    fontSize: 13, color: muted, cursor: "pointer", fontWeight: 400,
-    letterSpacing: 0.3,
-  },
-  footerCopy: { fontSize: 12, color: "rgba(255,255,255,0.25)" },
-};
+  }
