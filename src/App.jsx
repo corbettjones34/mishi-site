@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import MishiHomepage from "./MishiHomepage";
 import MishiDashboard from "./MishiDashboard";
+import MishiSettings from "./MishiSettings";
 
 export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState("dashboard"); // "dashboard" | "settings"
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,6 +43,7 @@ export default function App() {
   async function handleSignOut() {
     await supabase.auth.signOut();
     setSession(null);
+    setPage("dashboard");
   }
 
   if (loading) {
@@ -60,7 +63,21 @@ export default function App() {
   }
 
   if (session?.user) {
-    return <MishiDashboard user={session.user} onSignOut={handleSignOut} />;
+    if (page === "settings") {
+      return (
+        <MishiSettings
+          user={session.user}
+          onBack={() => setPage("dashboard")}
+        />
+      );
+    }
+    return (
+      <MishiDashboard
+        user={session.user}
+        onSignOut={handleSignOut}
+        onOpenSettings={() => setPage("settings")}
+      />
+    );
   }
 
   return <MishiHomepage onSignIn={handleSignIn} />;

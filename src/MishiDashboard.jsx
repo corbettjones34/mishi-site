@@ -74,7 +74,7 @@ function formatDates(depart, ret) {
 }
 
 
-export default function MishiDashboard({ user, onSignOut }) {
+export default function MishiDashboard({ user, onSignOut, onOpenSettings }) {
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -180,7 +180,7 @@ export default function MishiDashboard({ user, onSignOut }) {
     return (
       <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
         <style>{responsiveCSS}</style>
-        <Nav user={user} onSignOut={onSignOut} />
+        <Nav user={user} onSignOut={onSignOut} onOpenSettings={onOpenSettings} />
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
           height: "calc(100vh - 72px)", flexDirection: "column", gap: 16
@@ -197,7 +197,7 @@ export default function MishiDashboard({ user, onSignOut }) {
     return (
       <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
         <style>{responsiveCSS}</style>
-        <Nav user={user} onSignOut={onSignOut} />
+        <Nav user={user} onSignOut={onSignOut} onOpenSettings={onOpenSettings} />
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
           height: "calc(100vh - 72px)", flexDirection: "column", gap: 16,
@@ -217,7 +217,7 @@ export default function MishiDashboard({ user, onSignOut }) {
   return (
     <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#f5f4f0" }}>
       <style>{responsiveCSS}</style>
-      <Nav user={user} onSignOut={onSignOut} />
+      <Nav user={user} onSignOut={onSignOut} onOpenSettings={onOpenSettings} />
 
       {/* ─── Hero: Top Mission ─── */}
       {topMission && (
@@ -338,7 +338,7 @@ export default function MishiDashboard({ user, onSignOut }) {
 /* ═══════════════════════════════════════════════════════════
    Nav (logged-in) — hamburger on mobile
    ═══════════════════════════════════════════════════════════ */
-function Nav({ user, onSignOut }) {
+function Nav({ user, onSignOut, onOpenSettings }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const initials = (user.user_metadata?.full_name || user.email || "?")
     .split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
@@ -350,6 +350,7 @@ function Nav({ user, onSignOut }) {
       {/* Desktop nav links */}
       <div className="nav-desktop" style={styles.navRight}>
         <span style={{ ...styles.navLink, color: "#9EB384" }}>My Missions</span>
+        <button onClick={onOpenSettings} style={styles.navLink}>Settings</button>
         <button onClick={onSignOut} style={styles.navLink}>Sign out</button>
         <div style={styles.avatar}>{initials}</div>
       </div>
@@ -360,6 +361,7 @@ function Nav({ user, onSignOut }) {
         {menuOpen && (
           <div style={styles.mobileMenu}>
             <span style={{ ...styles.mobileMenuItem, color: "#9EB384" }}>My Missions</span>
+            <button onClick={onOpenSettings} style={styles.mobileMenuItem}>Settings</button>
             <button onClick={onSignOut} style={styles.mobileMenuItem}>Sign out</button>
           </div>
         )}
