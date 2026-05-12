@@ -132,10 +132,15 @@ export default function MishiSettings({ user, onBack }) {
     setSaved(false);
   }
 
+  function toArray(val) {
+    if (Array.isArray(val)) return val;
+    if (!val) return [];
+    return String(val).split(/[,;]/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+  }
+
   function toggleMulti(key, option) {
     setAnswers((prev) => {
-      const current = prev[key] || [];
-      const arr = Array.isArray(current) ? current : current.split(",").map((s) => s.trim()).filter(Boolean);
+      const arr = toArray(prev[key]);
       const next = arr.includes(option)
         ? arr.filter((o) => o !== option)
         : [...arr, option];
@@ -221,9 +226,7 @@ export default function MishiSettings({ user, onBack }) {
               {q.type === "multi" && (
                 <div style={s.optionsRow}>
                   {q.options.map((opt) => {
-                    const arr = Array.isArray(answers[q.key])
-                      ? answers[q.key]
-                      : (answers[q.key] || "").split(",").map((x) => x.trim()).filter(Boolean);
+                    const arr = toArray(answers[q.key]);
                     const selected = arr.includes(opt);
                     return (
                       <button
