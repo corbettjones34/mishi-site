@@ -36,53 +36,45 @@ const HERO_SLIDES = [
   },
 ];
 
-// ─── Live missions (sample data) ───
-const MISSIONS = [
+// ─── API for live missions on logged-out page ───
+const API_URL = "https://script.google.com/macros/s/AKfycbwW4qnpEN6wG0MCB5ZpKOiDwJ2cLI8LElNs8nOq1b7KMKbC6N4MBYp6WQnvH74VU2E_/exec";
+
+// Fallback data if API is unavailable
+const FALLBACK_MISSIONS = [
   {
-    name: "West Sumbawa",
-    region: "Indonesia",
-    tag: "surf",
-    signal: "4.5ft @ 14s · Offshore",
-    why: "Consistent swell and clean winds all week",
-    image: "/images/card-sumbawa.jpg",
-    dates: "May 1 – 7",
-    days: 7,
-    price: "$720",
+    name: "West Sumbawa", region: "Indonesia", tag: "surf",
+    signal: "Swell building", why: "Consistent swell and clean winds",
+    image: "/images/card-sumbawa.jpg", dates: "", days: 7,
   },
   {
-    name: "Seoul",
-    region: "South Korea",
-    tag: "city",
-    signal: "21°C · Dry · Low humidity",
-    why: "Perfect exploring weather — no rain forecast",
-    image: "/images/card-seoul.jpg",
-    dates: "May 1 – 5",
-    days: 4,
-    price: "$825",
+    name: "Seoul", region: "South Korea", tag: "city",
+    signal: "Cool and dry", why: "Perfect exploring weather",
+    image: "/images/card-seoul.jpg", dates: "", days: 4,
   },
   {
-    name: "Koh Samui",
-    region: "Thailand",
-    tag: "beach",
-    signal: "31°C · Calm seas · Clear",
-    why: "Pre-monsoon sweet spot — empty beaches",
-    image: "/images/card-samui.jpg",
-    dates: "May 2 – 7",
-    days: 5,
-    price: "$200",
+    name: "Koh Samui", region: "Thailand", tag: "beach",
+    signal: "Calm seas", why: "Pre-monsoon sweet spot — empty beaches",
+    image: "/images/card-samui.jpg", dates: "", days: 5,
   },
   {
-    name: "Melbourne",
-    region: "Australia",
-    tag: "city",
-    signal: "22°C · Mostly dry",
-    why: "Autumn sweet spot — great food and culture",
-    image: "/images/card-melbourne.jpg",
-    dates: "May 1 – 5",
-    days: 4,
-    price: "$536",
+    name: "Melbourne", region: "Australia", tag: "city",
+    signal: "Mostly dry", why: "Great food and culture weather",
+    image: "/images/card-melbourne.jpg", dates: "", days: 4,
   },
 ];
+
+function formatDatesHomepage(depart, ret) {
+  if (!depart) return "";
+  const d = new Date(depart);
+  const r = ret ? new Date(ret) : null;
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const dStr = `${months[d.getMonth()]} ${d.getDate()}`;
+  if (!r) return dStr;
+  const rStr = d.getMonth() === r.getMonth()
+    ? `${r.getDate()}`
+    : `${months[r.getMonth()]} ${r.getDate()}`;
+  return `${dStr} – ${rStr}`;
+}
 
 function tagLabel(tag) {
   const labels = { surf: "Surf", snow: "Snow", city: "City", beach: "Beach", safari: "Safari" };
@@ -271,11 +263,8 @@ function MissionCard({ mission, index }) {
         <p style={s.cardWhy}>{mission.why}</p>
 
         <div style={s.cardFooter}>
-          <div>
-            <span style={s.cardPrice}>Flights from {mission.price}</span>
-            <span style={s.cardPriceSub}>  per person return</span>
-          </div>
-          <span style={s.cardDates}>{mission.dates}</span>
+          <span style={s.cardDates}>{mission.dates || ""}</span>
+          {mission.days > 0 && <span style={s.cardDates}>{mission.days} days</span>}
         </div>
 
         <button style={s.cardCta}>
@@ -287,6 +276,29 @@ function MissionCard({ mission, index }) {
 }
 
 function LiveMissions() {
+  const [missions, setMissions] = useState(FALLBACK_MISSIONS);
+
+  useEffect(() => {
+    fetch(`${API_URL}?action=goodconditions`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.destinations && data.destinations.length > 0) {
+          const mapped = data.destinations.slice(0, 4).map(d => ({
+            name: d.Resort || d.resort || "",
+            region: "",
+            tag: (d.Tag || d.tag || "").split(",")[0].trim().toLowerCase(),
+            signal: (d.Conditions || d.conditions || "Monitoring").split("\n")[0].trim(),
+            why: d.Description ? d.Description.slice(0, 100) + (d.Description.length > 100 ? "..." : "") : "",
+            image: d.Image || d.image || "/images/hero-beach.jpg",
+            dates: formatDatesHomepage(d["Date Depart"] || d.dateDepart, d["Date Return"] || d.dateReturn),
+            days: d.Days || d.days || 0,
+          }));
+          setMissions(mapped);
+        }
+      })
+      .catch(() => {});  // silently fall back to defaults
+  }, []);
+
   return (
     <section style={s.missionsSection}>
       <div style={s.sectionInner}>
@@ -299,8 +311,8 @@ function LiveMissions() {
         </div>
 
         <div style={s.cardGrid}>
-          {MISSIONS.map((m, i) => (
-            <MissionCard key={m.name} mission={m} index={i} />
+          {missions.map((m, i) => (
+            <MissionCard key={m.name + i} mission={m} index={i} />
           ))}
         </div>
       </div>
