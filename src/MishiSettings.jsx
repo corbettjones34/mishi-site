@@ -69,10 +69,11 @@ const QUESTIONS = [
 ];
 
 
-export default function MishiSettings({ user, onBack }) {
+export default function MishiSettings({ user, onBack, firstTime = false }) {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
 
@@ -104,21 +105,47 @@ export default function MishiSettings({ user, onBack }) {
       setError(null);
       setSaved(false);
 
+      // For new users, also save their full name from Google auth
+      const payload = {
+        action: "save_profile",
+        email: user.email,
+        ...answers,
+      };
+      if (firstTime && user.user_metadata?.full_name) {
+        payload.fullName = user.user_metadata.full_name;
+      }
+
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-          action: "save_profile",
-          email: user.email,
-          ...answers,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.error) {
         setError(data.error);
       } else {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
+        if (firstTime) {
+          // Generate initial recommendations before going to dashboard
+          setGenerating(true);
+          setSaving(false);
+          try {
+            await fetch(API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain" },
+              body: JSON.stringify({
+                action: "generate_recs",
+                email: user.email,
+              }),
+            });
+          } catch {
+            // If recs fail, still go to dashboard — daily runner will catch up
+          }
+          setGenerating(false);
+          onBack();
+        } else {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+        }
       }
     } catch (err) {
       setError("Couldn't save — please try again");
@@ -156,6 +183,23 @@ export default function MishiSettings({ user, onBack }) {
     }
   `;
 
+  if (generating) {
+    return (
+      <div style={s.page}>
+        <style>{responsiveCSS}</style>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", flexDirection: "column", gap: 20 }}>
+          <div style={s.spinner} />
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, color: "#f5f4f0", textAlign: "center" }}>
+            Finding your first missions...
+          </p>
+          <p style={{ color: "#8a8a82", fontSize: 14, fontWeight: 300, textAlign: "center", maxWidth: 360 }}>
+            We're scanning conditions and matching destinations to your profile. This takes a few seconds.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div style={s.page}>
@@ -174,18 +218,32 @@ export default function MishiSettings({ user, onBack }) {
 
       <div className="settings-container" style={s.container}>
         {/* Header */}
-        <button onClick={onBack} style={s.backBtn}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          Back to missions
-        </button>
-
-        <h1 className="settings-title" style={s.title}>Your travel profile</h1>
-        <p style={s.subtitle}>
-          These answers help Mishi find destinations that match you.
-          Update them anytime — your recommendations will adjust.
-        </p>
+        {firstTime ? (
+          <>
+            <div style={s.welcomeLogo}>mishi</div>
+            <h1 className="settings-title" style={s.title}>Welcome to Mishi</h1>
+            <p style={s.subtitle}>
+              Mishi monitors travel conditions around the world and matches you
+              to destinations when conditions are right — the right weather, the right
+              season, the right price. Answer a few quick questions so we can find
+              trips that suit you.
+            </p>
+          </>
+        ) : (
+          <>
+            <button onClick={onBack} style={s.backBtn}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back to missions
+            </button>
+            <h1 className="settings-title" style={s.title}>Your travel profile</h1>
+            <p style={s.subtitle}>
+              These answers help Mishi find destinations that match you.
+              Update them anytime — your recommendations will adjust.
+            </p>
+          </>
+        )}
 
         {/* Questions */}
         <div style={s.questionsWrap}>
@@ -260,7 +318,7 @@ export default function MishiSettings({ user, onBack }) {
               cursor: saving ? "default" : "pointer",
             }}
           >
-            {saving ? "Saving..." : "Save profile"}
+            {saving ? "Saving..." : firstTime ? "Start exploring" : "Save profile"}
           </button>
 
           {saved && (
@@ -296,6 +354,14 @@ const s = {
     padding: "0 48px",
     paddingTop: 40,
     paddingBottom: 120,
+  },
+  welcomeLogo: {
+    fontFamily: "'Playfair Display', serif",
+    fontSize: 28,
+    fontWeight: 700,
+    color: "#fff",
+    letterSpacing: -0.5,
+    marginBottom: 48,
   },
   backBtn: {
     display: "inline-flex",
