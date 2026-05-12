@@ -95,6 +95,7 @@ function tagLabel(tag) {
 
 function Nav({ onSignIn }) {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -110,10 +111,42 @@ function Nav({ onSignIn }) {
       borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
     }}>
       <span style={s.navLogo}>mishi</span>
-      <div style={s.navRight}>
+
+      {/* Desktop nav */}
+      <div className="nav-desktop" style={s.navRight}>
         <span style={s.navLink}>How it works</span>
         <span style={s.navLink}>Destinations</span>
         <button style={s.navCta} onClick={onSignIn}>Get started</button>
+      </div>
+
+      {/* Mobile hamburger */}
+      <div className="nav-mobile">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 8 }}
+          aria-label="Menu"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+            {menuOpen
+              ? <path d="M18 6L6 18M6 6l12 12" />
+              : <><path d="M3 12h18" /><path d="M3 6h18" /><path d="M3 18h18" /></>
+            }
+          </svg>
+        </button>
+        {menuOpen && (
+          <div style={{
+            position: "absolute", top: 56, right: 0,
+            background: "rgba(12,12,12,0.95)", backdropFilter: "blur(20px)",
+            borderRadius: 12, padding: "12px 0", minWidth: 180,
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}>
+            <span style={s.mobileMenuItem}>How it works</span>
+            <span style={s.mobileMenuItem}>Destinations</span>
+            <button onClick={onSignIn} style={{ ...s.mobileMenuItem, color: "#9EB384", fontWeight: 600 }}>
+              Get started
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );
@@ -416,6 +449,13 @@ export default function MishiHomepage({ onSignIn } = {}) {
         * { box-sizing: border-box; margin: 0; }
         body { overflow-x: hidden; }
         button { font-family: 'Inter', sans-serif; }
+
+        .nav-mobile { display: none !important; }
+        @media (max-width: 768px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile { display: flex !important; align-items: center; position: relative; }
+          nav { padding: 0 16px !important; }
+        }
       `}</style>
 
       <Nav onSignIn={onSignIn} />
@@ -500,6 +540,12 @@ const s = {
     borderRadius: 8, padding: "10px 22px",
     fontSize: 13, fontWeight: 500, cursor: "pointer",
     transition: "all 0.2s", letterSpacing: 0.3,
+  },
+  mobileMenuItem: {
+    display: "block", width: "100%", padding: "12px 20px",
+    background: "none", border: "none", textAlign: "left",
+    color: "rgba(255,255,255,0.7)", fontSize: 14,
+    fontFamily: "'Inter', sans-serif", cursor: "pointer",
   },
 
   // ─── Hero ───
