@@ -402,7 +402,7 @@ function MissionCard({ mission: m, onLearnMore }) {
         <div style={styles.cardSignal}>
           <div style={styles.signalDot} />
           <span style={{ fontSize: 13, color: "#f5f4f0" }}>
-            {(m.conditions || "Monitoring").split("\n")[0].trim()}
+            {(m.conditions || "Monitoring").split("\n").map(l => l.trim()).filter(Boolean)[0] || "Monitoring"}
           </span>
         </div>
         <h3 style={styles.cardName}>{m.destination}</h3>
