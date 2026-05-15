@@ -241,7 +241,7 @@ export default function MishiDashboard({ user, onSignOut, onOpenSettings }) {
                 <span style={styles.statValue}>
                   {topMission.flightPrice > 0 ? `Flights from ${formatPrice(topMission.flightPrice)}` : "Staycation"}
                 </span>
-                <span style={styles.statLabel}>{topMission.flightPrice > 0 ? "per person return" : ""}</span>
+                <span style={styles.statLabel}>{topMission.flightPrice > 0 ? "pp return" : ""}</span>
               </div>
               <div style={styles.stat}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -412,7 +412,7 @@ function MissionCard({ mission: m, onLearnMore }) {
             {m.flightPrice > 0 ? (
               <>
                 <span style={styles.cardPrice}>Flights from {formatPrice(m.flightPrice)}</span>
-                <span style={styles.cardPriceSub}>  per person return</span>
+                <span style={styles.cardPriceSub}> pp return</span>
               </>
             ) : (
               <span style={{ ...styles.cardPrice, color: "#9EB384" }}>Staycation</span>
@@ -798,15 +798,15 @@ const styles = {
   cardSignal: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 },
   signalDot: { width: 6, height: 6, borderRadius: "50%", background: "#9EB384", flexShrink: 0 },
   cardName: {
-    fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700,
+    fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700,
     color: "#f5f4f0", margin: "4px 0", letterSpacing: -0.3,
   },
   cardWhy: { fontSize: 13, color: "#8a8a82", lineHeight: 1.5, marginBottom: 16, fontWeight: 300 },
   cardMetaRow: {
     display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 16,
   },
-  cardPrice: { fontSize: 17, fontWeight: 700, color: "#f5f4f0", letterSpacing: -0.3 },
-  cardPriceSub: { fontSize: 11, color: "#8a8a82", fontWeight: 400 },
+  cardPrice: { fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.75)", letterSpacing: 0 },
+  cardPriceSub: { fontSize: 12, color: "#8a8a82", fontWeight: 400 },
   cardDates: { fontSize: 12, color: "#8a8a82", fontWeight: 400 },
   cardCtaPrimary: {
     width: "100%", padding: "11px 0",
