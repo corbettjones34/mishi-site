@@ -456,7 +456,12 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
   const tierLabel = budgetTier === "budget" ? "Budget" : budgetTier === "top-end" ? "Top-end" : "Mid-range";
   if (m.hotelPrice > 0) pills.push(`~$${Math.round(m.hotelPrice)}/night pp`);
   if (m.flightPrice > 0) pills.push(`~$${Math.round(m.flightPrice)} return from ${m.homeAirport || "home"}`);
-  pills.push(`${m.days} days`);
+  // Days: use API value, fall back to calculating from dates
+  const tripDays = m.days > 0 ? m.days
+    : (m.dateDepart && m.dateReturn)
+      ? Math.round((new Date(m.dateReturn) - new Date(m.dateDepart)) / 86400000)
+      : 0;
+  if (tripDays > 0) pills.push(`${tripDays} days`);
 
   // Use whyNow from API, fall back to conditions-based sentence
   const whyNow = m.whyNow
@@ -540,14 +545,16 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
                     <span style={styles.infoValue}>Local / no flight needed</span>
                   </div>
                 )}
-                <div style={styles.infoRow}>
-                  <span style={styles.infoLabel}>Food</span>
-                  <span style={styles.infoValue}>$10–30/day</span>
-                </div>
+                {(m.foodCost || m.foodPerDay > 0) && (
+                  <div style={styles.infoRow}>
+                    <span style={styles.infoLabel}>Food</span>
+                    <span style={styles.infoValue}>{m.foodCost ? `${m.foodCost}/day` : `~$${Math.round(m.foodPerDay)}/day`}</span>
+                  </div>
+                )}
                 {m.tripCost > 0 && (
                   <div style={{ ...styles.infoRow, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10, marginTop: 4 }}>
                     <span style={{ ...styles.infoLabel, fontWeight: 600, color: "#f5f4f0" }}>~${Math.round(m.tripCost).toLocaleString()} total pp</span>
-                    <span style={styles.infoValue}>{m.days} days</span>
+                    <span style={styles.infoValue}>{tripDays > 0 ? `${tripDays} days` : ""}</span>
                   </div>
                 )}
               </div>
@@ -581,7 +588,7 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.infoLabel}>Trip length</span>
-                  <span style={styles.infoValue}>{m.days} days</span>
+                  <span style={styles.infoValue}>{tripDays > 0 ? `${tripDays} days` : formatDates(m.dateDepart, m.dateReturn)}</span>
                 </div>
               </div>
             </div>
