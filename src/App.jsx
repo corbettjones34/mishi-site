@@ -4,7 +4,7 @@ import MishiHomepage from "./MishiHomepage";
 import MishiDashboard from "./MishiDashboard";
 import MishiSettings from "./MishiSettings";
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwW4qnpEN6wG0MCB5ZpKOiDwJ2cLI8LElNs8nOq1b7KMKbC6N4MBYp6WQnvH74VU2E_/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxG__16DI6ztPEYId9Dp63i6kW1LOIP6nFEXBpJbJqf9vWXeOsrKQZVmtKFpI17eRQ/exec";
 
 export default function App() {
   const [session, setSession] = useState(null);
