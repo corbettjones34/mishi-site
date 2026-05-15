@@ -548,15 +548,22 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
                 {(m.foodCost || m.foodPerDay > 0) && (
                   <div style={styles.infoRow}>
                     <span style={styles.infoLabel}>Food</span>
-                    <span style={styles.infoValue}>{m.foodCost ? `${m.foodCost}/day` : `~$${Math.round(m.foodPerDay)}/day`}</span>
+                    <span style={{ ...styles.infoValue, opacity: 0.6, fontSize: 12 }}>
+                      {m.foodCost ? `${m.foodCost}/day` : `from ~$${Math.round(m.foodPerDay)}/day`}
+                    </span>
                   </div>
                 )}
-                {m.tripCost > 0 && (
-                  <div style={{ ...styles.infoRow, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10, marginTop: 4 }}>
-                    <span style={{ ...styles.infoLabel, fontWeight: 600, color: "#f5f4f0" }}>~${Math.round(m.tripCost).toLocaleString()} total pp</span>
-                    <span style={styles.infoValue}>{tripDays > 0 ? `${tripDays} days` : ""}</span>
-                  </div>
-                )}
+                {(() => {
+                  // Strip food from total unless foodPerDay is 0 (included in accommodation)
+                  const foodTotal = m.foodPerDay > 0 && tripDays > 0 ? m.foodPerDay * tripDays : 0;
+                  const displayCost = m.tripCost > 0 ? Math.round(m.tripCost - foodTotal) : 0;
+                  return displayCost > 0 ? (
+                    <div style={{ ...styles.infoRow, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10, marginTop: 4 }}>
+                      <span style={{ ...styles.infoLabel, fontWeight: 600, color: "#f5f4f0" }}>~${displayCost.toLocaleString()} total pp</span>
+                      <span style={styles.infoValue}>{tripDays > 0 ? `${tripDays} days` : ""}</span>
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </div>
 
