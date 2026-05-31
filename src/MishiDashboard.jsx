@@ -607,7 +607,7 @@ function DestinationDetail({ mission: m, budgetTier = "mid-range", onClose }) {
             <h3 style={styles.readyTitle}>Ready to go?</h3>
             <p style={styles.readySub}>We'll build a personalised itinerary matched to your travel style, budget, and airport.</p>
             <div style={styles.readyActions}>
-              <PlanMyTripButton planMyTripUrl={m.planMyTripUrl} buttonStyle={styles.detailCtaBtn} />
+              <PlanMyTripButton planMyTripUrl={m.planMyTripUrl} showPace={m.paceRelevant !== false} buttonStyle={styles.detailCtaBtn} />
               <a
                 href={`https://wa.me/?text=${encodeURIComponent("Check this out — I found this trip on Mishi: " + m.destination + " " + getShareURL(m.destination))}`}
                 target="_blank"

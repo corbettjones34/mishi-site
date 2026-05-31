@@ -33,14 +33,17 @@ const PACES = [
   { value: "roam", label: "Move around", hint: "A road-trip / multi-stop" },
 ];
 
-export default function PlanMyTripButton({ planMyTripUrl, defaultCompanion = "", buttonStyle }) {
+export default function PlanMyTripButton({ planMyTripUrl, defaultCompanion = "", showPace = true, buttonStyle }) {
   const [open, setOpen] = useState(false);
   const [companion, setCompanion] = useState(defaultCompanion);
   const [pace, setPace] = useState("");
   const [mustDo, setMustDo] = useState("");
   const [sent, setSent] = useState(false);
 
-  const canSubmit = companion && pace && planMyTripUrl;
+  // When there's nowhere to move to (single standalone destination), the pace
+  // question is hidden and the trip defaults to one base.
+  const effectivePace = showPace ? pace : "base";
+  const canSubmit = companion && effectivePace && planMyTripUrl;
 
   function submit() {
     if (!canSubmit) return;
@@ -49,7 +52,7 @@ export default function PlanMyTripButton({ planMyTripUrl, defaultCompanion = "",
       planMyTripUrl +
       sep +
       "companion_type=" + encodeURIComponent(companion) +
-      "&pace=" + encodeURIComponent(pace) +
+      "&pace=" + encodeURIComponent(effectivePace) +
       "&must_do=" + encodeURIComponent(mustDo.trim());
     // Open in a new tab — the Make webhook is a GET endpoint, so this avoids CORS.
     window.open(url, "_blank", "noopener");
@@ -99,21 +102,23 @@ export default function PlanMyTripButton({ planMyTripUrl, defaultCompanion = "",
                   </div>
                 </div>
 
-                <div style={s.qBlock}>
-                  <span style={s.qLabel}>How do you want to move?</span>
-                  <div style={s.paceList}>
-                    {PACES.map((p) => (
-                      <button
-                        key={p.value}
-                        style={pace === p.value ? s.paceOn : s.paceBtn}
-                        onClick={() => setPace(p.value)}
-                      >
-                        <span style={s.paceMain}>{p.label}</span>
-                        <span style={s.paceHint}>{p.hint}</span>
-                      </button>
-                    ))}
+                {showPace && (
+                  <div style={s.qBlock}>
+                    <span style={s.qLabel}>How do you want to move?</span>
+                    <div style={s.paceList}>
+                      {PACES.map((p) => (
+                        <button
+                          key={p.value}
+                          style={pace === p.value ? s.paceOn : s.paceBtn}
+                          onClick={() => setPace(p.value)}
+                        >
+                          <span style={s.paceMain}>{p.label}</span>
+                          <span style={s.paceHint}>{p.hint}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div style={s.qBlock}>
                   <span style={s.qLabel}>
