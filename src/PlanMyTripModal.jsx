@@ -54,8 +54,14 @@ export default function PlanMyTripButton({ planMyTripUrl, defaultCompanion = "",
       "companion_type=" + encodeURIComponent(companion) +
       "&pace=" + encodeURIComponent(effectivePace) +
       "&must_do=" + encodeURIComponent(mustDo.trim());
-    // Open in a new tab — the Make webhook is a GET endpoint, so this avoids CORS.
-    window.open(url, "_blank", "noopener");
+    // Fire the webhook in the background so the user stays on our own dark
+    // confirmation screen — no second tab showing Make's response page.
+    try {
+      fetch(url, { mode: "no-cors", keepalive: true });
+    } catch (e) {
+      // Fallback: a pixel beacon still delivers the GET to the webhook.
+      new Image().src = url;
+    }
     setSent(true);
   }
 
